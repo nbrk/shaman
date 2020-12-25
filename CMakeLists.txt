@@ -16,4 +16,10 @@ target_link_directories(shaman PRIVATE /usr/local/lib)
 target_link_libraries(shaman PRIVATE GL GLEW)
 target_include_directories(shaman PUBLIC include/)
 
+set_target_properties(shaman PROPERTIES PUBLIC_HEADER include/shaman.h)
+install(TARGETS shaman
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+
 add_subdirectory(test)
