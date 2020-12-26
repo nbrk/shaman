@@ -123,7 +123,11 @@ shaman_gl_read_distinct_compile_assemble_delete(const char *vertex_path,
                                                 const char *fragment_path) {
   shaman_sources_t sources = shaman_read_distinct(vertex_path, fragment_path);
   shaman_compiled_t compiled = shaman_gl_compile(sources);
-  return shaman_gl_assemble_program(compiled, NULL);
+  unsigned int program_id = shaman_gl_assemble_program(compiled, NULL);
+  /* XXX */
+  glDeleteShader(compiled.vertex_id);
+  glDeleteShader(compiled.fragment_id);
+  return program_id;
 }
 
 unsigned int shaman_gl_read_combined_compile_assemble_delete(const char *path) {
