@@ -19,9 +19,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-//#define SHAMAN_IMPLEMENTATION
-//#include "shaman.h"
-#include <shaman.h>
+#define SHAMAN_IMPLEMENTATION
+#include "../shaman.h"
+
+//#include <shaman.h>
 
 #include <unistd.h>
 
@@ -32,9 +33,9 @@
  * Shaders
  */
 const char vertexShaderPath[] =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.vert";
+    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.vert";
 const char fragmentShaderPath[] =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.frag";
+    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.frag";
 
 /*
  * Vertex data
@@ -70,8 +71,6 @@ int main(int argc, char** argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   GLFWwindow* window = glfwCreateWindow(1024, 768, "Test 1", NULL, NULL);
   glfwMakeContextCurrent(window);
-
-  shamanInitInContext();
 
   glewExperimental = GL_TRUE;
   glewInit();
@@ -118,15 +117,16 @@ int main(int argc, char** argv) {
   GLuint program =
       shamanMakeProgram(vertexShaderPath, fragmentShaderPath, NULL);
   glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_position"));
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_normal"));
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_color"));
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "texcoord"));
+
   glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3,
                         GL_FLOAT, GL_FALSE, 0, (void*)vertexPositionsOff);
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_normal"));
   glVertexAttribPointer(shamanGetAttribLocation(program, "a_normal"), 3,
                         GL_FLOAT, GL_FALSE, 0, (void*)vertexNormalsOff);
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_color"));
   glVertexAttribPointer(shamanGetAttribLocation(program, "a_color"), 4,
                         GL_FLOAT, GL_FALSE, 0, (void*)vertexColorsOff);
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "texcoord"));
   glVertexAttribPointer(shamanGetAttribLocation(program, "texcoord"), 2,
                         GL_FLOAT, GL_FALSE, 0, (void*)vertexTexcoordsOff);
   glBindBuffer(GL_ARRAY_BUFFER, 0);

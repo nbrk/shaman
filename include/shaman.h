@@ -26,7 +26,6 @@
 /*
  * Simple OpenGL shader management library (shaman).
  *
- * Don't forget to call shamanInit() before use of the functions.
  */
 
 /*
@@ -41,8 +40,6 @@ extern bool shamanAbortOnMissingUniformLocation;
 /*
  * FUNCTIONS.
  */
-extern void shamanInitInContext(void);
-
 extern unsigned shamanMakeProgram(const char* vertexShaderPath,
                                   const char* fragmentShaderPath,
                                   const char* geometryShaderPath);

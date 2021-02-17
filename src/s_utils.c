@@ -21,18 +21,11 @@
  */
 #include "shaman_internal.h"
 
-#include <GL/glew.h>
-
 bool shamanWarnOnMissingAttribLocation = true;
 bool shamanWarnOnMissingUniformLocation = true;
 bool shamanAbortOnCompileErrors = false;
 bool shamanAbortOnMissingAttribLocation = true;
 bool shamanAbortOnMissingUniformLocation = true;
-
-void shamanInitInContext(void) {
-  glewExperimental = GL_TRUE;
-  glewInit();
-}
 
 size_t shamanFileGetSize(FILE* fp) {
   size_t curpos = ftell(fp);

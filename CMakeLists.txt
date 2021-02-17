@@ -17,7 +17,7 @@ set(SRCS
 add_library(shaman SHARED ${SRCS})
 target_include_directories(shaman PRIVATE /usr/local/include)
 target_link_directories(shaman PRIVATE /usr/local/lib)
-target_link_libraries(shaman PRIVATE GL GLEW)
+target_link_libraries(shaman PRIVATE GLEW)
 target_include_directories(shaman PUBLIC include/)
 
 set_target_properties(shaman PROPERTIES PUBLIC_HEADER include/shaman.h)

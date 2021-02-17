@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nikolay Burkov <nbrk@linklevel.net>
+ * Copyright 2020 Nikolay Burkov <nbrk@linklevel.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,30 +21,46 @@
  */
 #pragma once
 
-/*
- * Shaman (Shader Management) library.
- *
- * Public API and the implementation: use #define SHAMAN_IMPLEMENTATION in a
- * source file before including this file to embed the function implementation
- * code also.
- */
 #include <stdbool.h>
 
 /*
- * Public API.
+ * Simple OpenGL shader management library (shaman).
+ *
  */
-extern void shamanInitInContext(void);
+
+/*
+ * DATA.
+ */
+extern bool shamanWarnOnMissingAttribLocation;
+extern bool shamanWarnOnMissingUniformLocation;
+extern bool shamanAbortOnCompileErrors;
+extern bool shamanAbortOnMissingAttribLocation;
+extern bool shamanAbortOnMissingUniformLocation;
+
+/*
+ * FUNCTIONS.
+ */
 extern unsigned shamanMakeProgram(const char* vertexShaderPath,
                                   const char* fragmentShaderPath,
                                   const char* geometryShaderPath);
+
 extern unsigned shamanMakeProgramFromStrings(const char* vertexShaderText,
                                              const char* fragmentShaderText,
                                              const char* geometryShaderText);
+
 extern void shamanUseProgram(unsigned program);
+
 extern void shamanUnuseProgram(void);
+
 extern void shamanDeleteProgram(unsigned program);
+
 extern int shamanGetAttribLocation(unsigned program, const char* name);
+
 extern int shamanGetUniformLocation(unsigned program, const char* name);
+
+/*
+ * Uniforms values via stack
+ */
 extern void shamanSetUniform1f(unsigned program, const char* name, float v0);
 extern void shamanSetUniform2f(unsigned program,
                                const char* name,
@@ -61,6 +77,7 @@ extern void shamanSetUniform4f(unsigned program,
                                float v1,
                                float v2,
                                float v3);
+
 extern void shamanSetUniform1i(unsigned program, const char* name, int v0);
 extern void shamanSetUniform2i(unsigned program,
                                const char* name,
@@ -77,6 +94,7 @@ extern void shamanSetUniform4i(unsigned program,
                                int v1,
                                int v2,
                                int v3);
+
 extern void shamanSetUniform1ui(unsigned program,
                                 const char* name,
                                 unsigned v0);
@@ -95,6 +113,11 @@ extern void shamanSetUniform4ui(unsigned program,
                                 unsigned v1,
                                 unsigned v2,
                                 unsigned v3);
+
+/*
+ * Uniforms vectorized
+ */
+
 extern void shamanSetUniform1fv(unsigned program,
                                 const char* name,
                                 int count,
@@ -111,6 +134,7 @@ extern void shamanSetUniform4fv(unsigned program,
                                 const char* name,
                                 int count,
                                 const float* value);
+
 extern void shamanSetUniform1iv(unsigned program,
                                 const char* name,
                                 int count,
@@ -127,6 +151,7 @@ extern void shamanSetUniform4iv(unsigned program,
                                 const char* name,
                                 int count,
                                 const int* value);
+
 extern void shamanSetUniform1uiv(unsigned program,
                                  const char* name,
                                  int count,
@@ -143,6 +168,11 @@ extern void shamanSetUniform4uiv(unsigned program,
                                  const char* name,
                                  int count,
                                  const unsigned* value);
+
+/*
+ * Uniforms matrices
+ */
+
 extern void shamanSetUniformMatrix2fv(unsigned program,
                                       const char* name,
                                       int count,
@@ -188,18 +218,22 @@ extern void shamanSetUniformMatrix4x3fv(unsigned program,
                                         int count,
                                         bool transpose,
                                         const float* value);
-/*
- * Implementation (define SHAMAN_IMPLEMENTATION).
- */
+
 #ifdef SHAMAN_IMPLEMENTATION
+#include <GL/glew.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <GL/glew.h>
+bool shamanWarnOnMissingAttribLocation = true;
+bool shamanWarnOnMissingUniformLocation = true;
+bool shamanAbortOnCompileErrors = false;
+bool shamanAbortOnMissingAttribLocation = true;
+bool shamanAbortOnMissingUniformLocation = true;
 
-static size_t shamanFileGetSize(FILE* fp) {
+size_t shamanFileGetSize(FILE* fp) {
   size_t curpos = ftell(fp);
   fseek(fp, 0, SEEK_END);
   size_t endpos = ftell(fp);
@@ -207,7 +241,7 @@ static size_t shamanFileGetSize(FILE* fp) {
   return endpos;
 }
 
-static char* shamanFileGetContents(FILE* fp) {
+char* shamanFileGetContents(FILE* fp) {
   size_t sourcelen = shamanFileGetSize(fp);
   char* source = malloc(sourcelen + 1);
   size_t nobjs = fread(source, sourcelen, 1, fp);
@@ -217,11 +251,6 @@ static char* shamanFileGetContents(FILE* fp) {
     return NULL;
   } else
     return source;
-}
-
-void shamanInitInContext(void) {
-  glewExperimental = GL_TRUE;
-  glewInit();
 }
 
 static int shamanProgramAddShader(GLuint program,
@@ -242,7 +271,8 @@ static int shamanProgramAddShader(GLuint program,
     GLchar* buffer = malloc((size_t)param_val);
     glGetShaderInfoLog(shader, param_val, NULL, buffer);
     glDeleteShader(shader);
-    printf("Shader type %d compile error: %s\n", shader_type, buffer);
+    fprintf(stderr, "ERROR: Shader type %d compile error: %s\n", shader_type,
+            buffer);
     free(buffer);
     return -1;
   }
@@ -281,7 +311,7 @@ static GLuint shamanProgramCreate(const char* vertexText,
     GLchar* buffer = malloc((size_t)param_val);
     glGetProgramInfoLog(program, param_val, NULL, buffer);
     glDeleteProgram(program);
-    printf("Program link error: %s\n", buffer);
+    fprintf(stderr, "ERROR: Program link error: %s\n", buffer);
     free(buffer);
     return 0;
   }
@@ -292,7 +322,7 @@ static GLuint shamanProgramCreate(const char* vertexText,
     GLchar* buffer = malloc((size_t)param_val);
     glGetProgramInfoLog(program, param_val, NULL, buffer);
     glDeleteProgram(program);
-    printf("Program validation error: %s\n", buffer);
+    fprintf(stderr, "ERROR: Program validation error: %s\n", buffer);
     free(buffer);
     return 0;
   }
@@ -306,6 +336,10 @@ unsigned shamanMakeProgramFromStrings(const char* vertexText,
   assert(vertexText != NULL);
   assert(fragmentText != NULL);
   GLuint program = shamanProgramCreate(vertexText, fragmentText, geometryText);
+
+  if (shamanAbortOnCompileErrors == true) {
+    assert(program != 0);
+  }
 
   return (unsigned)program;
 }
@@ -346,6 +380,10 @@ unsigned shamanMakeProgram(const char* vertexPath,
   free(fragmentText);
   free(geometryText);
 
+  if (shamanAbortOnCompileErrors == true) {
+    assert(program != 0);
+  }
+
   return (unsigned)program;
 }
 
@@ -363,18 +401,26 @@ void shamanUnuseProgram(void) {
 
 int shamanGetAttribLocation(unsigned program, const char* name) {
   GLint location = glGetAttribLocation(program, name);
-  if (location == -1)
-    printf("No attrib '%s' in shader program %d\n", name, program);
-  assert(location != -1);
+  if (location == -1) {
+    if (shamanWarnOnMissingAttribLocation)
+      fprintf(stderr, "WARNING: No attrib '%s' in shader program %d\n", name,
+              program);
+    if (shamanAbortOnMissingAttribLocation)
+      assert(location != -1);
+  }
 
   return (int)location;
 }
 
 int shamanGetUniformLocation(unsigned program, const char* name) {
   GLint location = glGetUniformLocation(program, name);
-  if (location == -1)
-    printf("No uniform '%s' in shader program %d\n", name, program);
-  assert(location != -1);
+  if (location == -1) {
+    if (shamanWarnOnMissingUniformLocation)
+      fprintf(stderr, "WARNING: No uniform '%s' in shader program %d\n", name,
+              program);
+    if (shamanAbortOnMissingUniformLocation)
+      assert(location != -1);
+  }
 
   return (int)location;
 }
@@ -599,4 +645,5 @@ void shamanSetUniformMatrix4x3fv(unsigned program,
   glUniformMatrix4x3fv(shamanGetUniformLocation(program, name), count,
                        transpose, value);
 }
-#endif /* SHAMAN_IMPLEMENTATION */
+
+#endif

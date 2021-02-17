@@ -1,63 +1,57 @@
-# Dead-simple shader management library (shaman)
+# Extremely simple OpenGL shader loading/management library
+Shaman is a small, **C89 header-only**, **easy to use** OpenGL shader program 
+loading library.
 
-## Purpose
-The library helps to group all shaders that are intended to be used in one 
-OpenGL program. Users can create such a group by providing
+It can be integrated in an existing project in a matter of seconds. The only 
+dependency of the implementation code is `GLEW` (popular OpenGL extension loader), which is
+only needed for a few OpenGL API calls throughout the library.
 
-- **distinct shader source files** (i.e. a file for the *vertex* shader, 
-a file for the *fragment* shader)
-- **or** by providing a **combined source file** where each shader text is
-prepended by the string `#shader vertex` or `#shader fragment` respectively.
-
-Example of the combined source file `foo.shaman`:
-
-``` glsl
-#shader fragment
-#version 130
-
-out vec4 fragColor;
-
-void main()
-{
-    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-}
-
-#shader vertex
-#version 130
-
-in vec4 position;
-
-uniform mat4 mat;
-
-void main()
-{
-    gl_Position = position;
-}
-```
-
-The library makes it extremely simple to read such sources from files, to 
-compile and in general to keep them together. It is very easy then to create
-and link the full OpenGL program from the compiled sources.
+## Features
+Shaman library has the following features:
+- Header-only: just include the header after `#define SHAMAN_IMPLEMENTATION`
+- Assemble shader programs from source files or from char arrays
+- Uniform setters wrapped in uniform locations lookup
+- User-toggled warnings/aborts on missing attrib or uniform location lookups
+- No extra data-types, non-invasive design: all returned data is plain OpenGL data
 
 ## Usage
-Structure `shaman_sources_t` represents the group's sources read into memory.
-Structure `shaman_compiled_t` represents compiled OpenGL shader ids of the group.
+You can use `shaman` as a shared library (see `test/test2.c`) or by including 
+the `shaman.h` in your project after defining `#define SHAMAN_IMPLEMENTATION`. If
+the `SHAMAN_IMPLEMENTATION` is not defined, then only the public API is visible.
 
-Please see the API header for other documentation for now.
-
-Dead-simple one-liners are:
+The API is very simple: the main function is `shamanMakeProgram(vSrc, fSrc, gSrc)`
+that returns the compiled and linked OpenGL program object:
 
 ``` c
+#define SHAMAN_IMPLEMENTATION
+#include "shaman.h"
 
-  // ... in an OpenGL context
-  
-  GLuint program1 = shaman_gl_read_distinct_compile_assemble_delete(
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.vert",
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.frag");
-      
-  GLuint program2 = shaman_gl_read_combined_compile_assemble_delete(
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/basic.shaman");
-      
-  // now juse use the programs
+// ...
+
+GLuint program1 = shamanMakeProgram("shaders/shader1.vert", "shaders/shader1.frag", NULL);
+GLuint program2 = shamanMakeProgram("shaders/shader2.vert", "shader2.frag", NULL); 
+
+// ...
+
+glUseProgram(program1);
+
+// ...
+
+shamanSetUniform1f(program1, "horizoff", horizoff);
+
 ```
 
+As you can see, you can look up uniform locations or attrib locations (beware the 
+unused attributes that could be optimized-away by the GLSL compiler, though):
+
+``` c
+// ...
+glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_position"));
+glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3, GL_FLOAT, GL_FALSE, 0, (void*)vertexPositionsOff);
+```
+
+## Header files
+There are two header files in the Shaman source directory:
+1. `shaman.h`, which contains both API and the implementation (when SHAMAN_IMPLEMENTATION is defined).
+** Copy this file alone into your project**.
+2. `include/shaman.h`, which contains only the API as part of the `shaman` shared library.
