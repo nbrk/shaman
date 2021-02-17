@@ -47,6 +47,7 @@ unused attributes that could be optimized-away by the GLSL compiler, though):
 
 ``` c
 // ...
+shamanAbortOnMissingAttribLocation = false;
 glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_position"));
 glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3, GL_FLOAT, GL_FALSE, 0, (void*)vertexPositionsOff);
 ```
