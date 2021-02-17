@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 project(shaman LANGUAGES C)
 
 set(SRCS
+  shaman.h
+
   include/shaman.h
 
   src/shaman_internal.h

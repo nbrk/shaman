@@ -32,11 +32,16 @@
 /*
  * DATA.
  */
+extern bool shamanWarnOnMissingAttribLocation;
+extern bool shamanWarnOnMissingUniformLocation;
+extern bool shamanAbortOnCompileErrors;
+extern bool shamanAbortOnMissingAttribLocation;
+extern bool shamanAbortOnMissingUniformLocation;
 
 /*
  * FUNCTIONS.
  */
-extern void shamanInit(void);
+extern void shamanInitInContext(void);
 
 extern unsigned shamanMakeProgram(const char* vertexShaderPath,
                                   const char* fragmentShaderPath,

@@ -20,10 +20,12 @@
  * IN THE SOFTWARE.
  */
 #pragma once
+#include <shaman.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-extern size_t fileGetSize(FILE* fp);
-extern char* fileGetContents(FILE* fp);
+extern size_t shamanFileGetSize(FILE* fp);
+extern char* shamanFileGetContents(FILE* fp);

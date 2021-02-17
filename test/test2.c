@@ -19,7 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <shaman.h>
+
+#define SHAMAN_IMPLEMENTATION
+#include "shaman.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +54,7 @@ int main() {
 
   // init extensions in the current OpenGL context
   glewInit();
-  shamanInit();
+  shamanInitInContext();
 
   // Defult VAO -- needed for core profile
   GLuint vao = 0;

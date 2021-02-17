@@ -19,38 +19,140 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+//#define SHAMAN_IMPLEMENTATION
+//#include "shaman.h"
 #include <shaman.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
-static const char *combined_path =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/basic.shaman";
-static const char *vert_path =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.vert";
-static const char *frag_path =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.frag";
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-static const char *test_text =
-    "Hello\n#shader foo\nTesting test\nFoobar\n#shader "
-    "koo\nSomething at the end\n";
+/*
+ * Shaders
+ */
+const char vertexShaderPath[] =
+    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.vert";
+const char fragmentShaderPath[] =
+    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.frag";
 
-int main(int argc, char **argv) {
-  shaman_sources_t sources1 = shaman_read_combined(combined_path);
-  shaman_sources_t sources2 = shaman_read_distinct(vert_path, frag_path);
+/*
+ * Vertex data
+ */
+const GLfloat vertexPositions[] = {
+    -0.5f, -0.5f, 0.f,  //
+    0.5f,  -0.5f, 0.f,  //
+    0.f,   0.5f,  0.f   //
+};
 
-  printf("====== Combined ======\n");
-  printf("Vertex text:\n");
-  printf("%s======\n", sources1.vertex_text);
-  printf("Fragment text:\n");
-  printf("%s======\n", sources1.fragment_text);
+const GLfloat vertexNormals[] = {
+    0.f, 0.f, 1.f,  //
+    0.f, 0.f, 1.f,  //
+    0.f, 0.f, 1.f   //
+};
 
-  printf("====== Separate ======\n");
-  printf("Vertex text:\n");
-  printf("%s======\n", sources2.vertex_text);
-  printf("Fragment text:\n");
-  printf("%s======\n", sources2.fragment_text);
+const GLfloat vertexColors[] = {
+    1.f, 0.f, 0.f, 1.f,  //
+    0.f, 1.f, 0.f, 1.f,  //
+    0.f, 0.f, 1.f, 1.f   //
+};
 
-  return EXIT_SUCCESS;
+const GLfloat vertexTexcoords[] = {
+    0.0f, 0.0f,  //
+    1.0f, 0.0f,  //
+    0.5,  1.0f   //
+};
+
+int main(int argc, char** argv) {
+  glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  GLFWwindow* window = glfwCreateWindow(1024, 768, "Test 1", NULL, NULL);
+  glfwMakeContextCurrent(window);
+
+  shamanInitInContext();
+
+  glewExperimental = GL_TRUE;
+  glewInit();
+
+  /*
+   * Setup
+   */
+
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  /*
+   * Alloc enough space
+   */
+  glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(GLfloat) * (sizeof(vertexPositions) + sizeof(vertexNormals) +
+                         sizeof(vertexColors) + sizeof(vertexTexcoords)),
+      NULL, GL_STATIC_DRAW);
+  /*
+   * Upload the data. Buffer structure: positions, normals, colors, texcoords.
+   */
+  GLintptr vertexPositionsOff = 0;
+  GLintptr vertexNormalsOff = sizeof(GLfloat) * sizeof(vertexPositions);
+  GLintptr vertexColorsOff =
+      vertexNormalsOff + sizeof(GLfloat) * sizeof(vertexNormals);
+  GLintptr vertexTexcoordsOff =
+      vertexColorsOff + sizeof(GLfloat) * sizeof(vertexColors);
+  glBufferSubData(GL_ARRAY_BUFFER, vertexPositionsOff,
+                  sizeof(GLfloat) * sizeof(vertexPositions), vertexPositions);
+  glBufferSubData(GL_ARRAY_BUFFER, vertexNormalsOff,
+                  sizeof(GLfloat) * sizeof(vertexNormals), vertexNormals);
+  glBufferSubData(GL_ARRAY_BUFFER, vertexColorsOff,
+                  sizeof(GLfloat) * sizeof(vertexColors), vertexColors);
+  glBufferSubData(GL_ARRAY_BUFFER, vertexTexcoordsOff,
+                  sizeof(GLfloat) * sizeof(vertexTexcoords), vertexTexcoords);
+  /*
+   * Wire the datastream from the buffer as attributes
+   */
+  shamanAbortOnMissingAttribLocation = false;
+  GLuint program =
+      shamanMakeProgram(vertexShaderPath, fragmentShaderPath, NULL);
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_position"));
+  glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3,
+                        GL_FLOAT, GL_FALSE, 0, (void*)vertexPositionsOff);
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_normal"));
+  glVertexAttribPointer(shamanGetAttribLocation(program, "a_normal"), 3,
+                        GL_FLOAT, GL_FALSE, 0, (void*)vertexNormalsOff);
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_color"));
+  glVertexAttribPointer(shamanGetAttribLocation(program, "a_color"), 4,
+                        GL_FLOAT, GL_FALSE, 0, (void*)vertexColorsOff);
+  glEnableVertexAttribArray(shamanGetAttribLocation(program, "texcoord"));
+  glVertexAttribPointer(shamanGetAttribLocation(program, "texcoord"), 2,
+                        GL_FLOAT, GL_FALSE, 0, (void*)vertexTexcoordsOff);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  /*
+   * Render frame
+   */
+  glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  shamanUseProgram(program);
+  glBindVertexArray(vao);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glBindVertexArray(0);
+  shamanUnuseProgram();
+
+  glfwSwapBuffers(window);
+
+  sleep(5);
+
+  /*
+   * Termination
+   */
+  shamanDeleteProgram(program);
+  glfwTerminate();
+
+  return 0;
 }

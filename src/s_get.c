@@ -19,25 +19,33 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include <GL/glew.h>
+#include "shaman_internal.h"
 
+#include <GL/glew.h>
 #include <assert.h>
-#include <stdio.h>
 
 int shamanGetAttribLocation(unsigned program, const char* name) {
   GLint location = glGetAttribLocation(program, name);
-  if (location == -1)
-    printf("No attrib '%s' in shader program %d\n", name, program);
-  assert(location != -1);
+  if (location == -1) {
+    if (shamanWarnOnMissingAttribLocation)
+      fprintf(stderr, "WARNING: No attrib '%s' in shader program %d\n", name,
+              program);
+    if (shamanAbortOnMissingAttribLocation)
+      assert(location != -1);
+  }
 
   return (int)location;
 }
 
 int shamanGetUniformLocation(unsigned program, const char* name) {
   GLint location = glGetUniformLocation(program, name);
-  if (location == -1)
-    printf("No uniform '%s' in shader program %d\n", name, program);
-  assert(location != -1);
+  if (location == -1) {
+    if (shamanWarnOnMissingUniformLocation)
+      fprintf(stderr, "WARNING: No uniform '%s' in shader program %d\n", name,
+              program);
+    if (shamanAbortOnMissingUniformLocation)
+      assert(location != -1);
+  }
 
   return (int)location;
 }

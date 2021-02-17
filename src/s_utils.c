@@ -23,12 +23,18 @@
 
 #include <GL/glew.h>
 
-void shamanInit(void) {
+bool shamanWarnOnMissingAttribLocation = true;
+bool shamanWarnOnMissingUniformLocation = true;
+bool shamanAbortOnCompileErrors = false;
+bool shamanAbortOnMissingAttribLocation = true;
+bool shamanAbortOnMissingUniformLocation = true;
+
+void shamanInitInContext(void) {
   glewExperimental = GL_TRUE;
   glewInit();
 }
 
-size_t fileGetSize(FILE* fp) {
+size_t shamanFileGetSize(FILE* fp) {
   size_t curpos = ftell(fp);
   fseek(fp, 0, SEEK_END);
   size_t endpos = ftell(fp);
@@ -36,8 +42,8 @@ size_t fileGetSize(FILE* fp) {
   return endpos;
 }
 
-char* fileGetContents(FILE* fp) {
-  size_t sourcelen = fileGetSize(fp);
+char* shamanFileGetContents(FILE* fp) {
+  size_t sourcelen = shamanFileGetSize(fp);
   char* source = malloc(sourcelen + 1);
   size_t nobjs = fread(source, sourcelen, 1, fp);
 

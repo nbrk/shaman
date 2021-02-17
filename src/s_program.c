@@ -26,9 +26,9 @@
 
 #include <GL/glew.h>
 
-static int programAddShader(GLuint program,
-                            GLenum shader_type,
-                            const char* shader_src) {
+static int shamanProgramAddShader(GLuint program,
+                                  GLenum shader_type,
+                                  const char* shader_src) {
   GLuint shader = glCreateShader(shader_type);
   const GLchar* source[1] = {shader_src};
   const GLint length[1] = {(GLint)strlen(shader_src)};
@@ -44,7 +44,8 @@ static int programAddShader(GLuint program,
     GLchar* buffer = malloc((size_t)param_val);
     glGetShaderInfoLog(shader, param_val, NULL, buffer);
     glDeleteShader(shader);
-    printf("Shader type %d compile error: %s\n", shader_type, buffer);
+    fprintf(stderr, "ERROR: Shader type %d compile error: %s\n", shader_type,
+            buffer);
     free(buffer);
     return -1;
   }
@@ -54,22 +55,23 @@ static int programAddShader(GLuint program,
   return 0;
 }
 
-static GLuint programCreate(const char* vertexText,
-                            const char* fragmentText,
-                            const char* geometryText) {
+static GLuint shamanProgramCreate(const char* vertexText,
+                                  const char* fragmentText,
+                                  const char* geometryText) {
   GLuint program;
   program = glCreateProgram();
 
-  if (programAddShader(program, GL_VERTEX_SHADER, vertexText) != 0) {
+  if (shamanProgramAddShader(program, GL_VERTEX_SHADER, vertexText) != 0) {
     glDeleteProgram(program);
     return 0;
   }
-  if (programAddShader(program, GL_FRAGMENT_SHADER, fragmentText) != 0) {
+  if (shamanProgramAddShader(program, GL_FRAGMENT_SHADER, fragmentText) != 0) {
     glDeleteProgram(program);
     return 0;
   }
   if (geometryText != NULL) {
-    if (programAddShader(program, GL_GEOMETRY_SHADER, geometryText) != 0) {
+    if (shamanProgramAddShader(program, GL_GEOMETRY_SHADER, geometryText) !=
+        0) {
       glDeleteProgram(program);
       return 0;
     }
@@ -82,7 +84,7 @@ static GLuint programCreate(const char* vertexText,
     GLchar* buffer = malloc((size_t)param_val);
     glGetProgramInfoLog(program, param_val, NULL, buffer);
     glDeleteProgram(program);
-    printf("Program link error: %s\n", buffer);
+    fprintf(stderr, "ERROR: Program link error: %s\n", buffer);
     free(buffer);
     return 0;
   }
@@ -93,7 +95,7 @@ static GLuint programCreate(const char* vertexText,
     GLchar* buffer = malloc((size_t)param_val);
     glGetProgramInfoLog(program, param_val, NULL, buffer);
     glDeleteProgram(program);
-    printf("Program validation error: %s\n", buffer);
+    fprintf(stderr, "ERROR: Program validation error: %s\n", buffer);
     free(buffer);
     return 0;
   }
@@ -106,7 +108,11 @@ unsigned shamanMakeProgramFromStrings(const char* vertexText,
                                       const char* geometryText) {
   assert(vertexText != NULL);
   assert(fragmentText != NULL);
-  GLuint program = programCreate(vertexText, fragmentText, geometryText);
+  GLuint program = shamanProgramCreate(vertexText, fragmentText, geometryText);
+
+  if (shamanAbortOnCompileErrors == true) {
+    assert(program != 0);
+  }
 
   return (unsigned)program;
 }
@@ -125,18 +131,18 @@ unsigned shamanMakeProgram(const char* vertexPath,
 
   fp = fopen(vertexPath, "r");
   assert(fp != NULL);
-  vertexText = fileGetContents(fp);
+  vertexText = shamanFileGetContents(fp);
   fclose(fp);
 
   fp = fopen(fragmentPath, "r");
   assert(fp != NULL);
-  fragmentText = fileGetContents(fp);
+  fragmentText = shamanFileGetContents(fp);
   fclose(fp);
 
   if (geometryPath != NULL) {
     fp = fopen(geometryPath, "r");
     assert(fp != NULL);
-    geometryText = fileGetContents(fp);
+    geometryText = shamanFileGetContents(fp);
     fclose(fp);
   }
 
@@ -146,6 +152,10 @@ unsigned shamanMakeProgram(const char* vertexPath,
   free(vertexText);
   free(fragmentText);
   free(geometryText);
+
+  if (shamanAbortOnCompileErrors == true) {
+    assert(program != 0);
+  }
 
   return (unsigned)program;
 }
