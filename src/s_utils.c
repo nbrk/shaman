@@ -19,11 +19,31 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#pragma once
+#include "shaman_internal.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <GL/glew.h>
 
-extern size_t fileGetSize(FILE* fp);
-extern char* fileGetContents(FILE* fp);
+void shamanInit(void) {
+  glewExperimental = GL_TRUE;
+  glewInit();
+}
+
+size_t fileGetSize(FILE* fp) {
+  size_t curpos = ftell(fp);
+  fseek(fp, 0, SEEK_END);
+  size_t endpos = ftell(fp);
+  fseek(fp, curpos, SEEK_SET);
+  return endpos;
+}
+
+char* fileGetContents(FILE* fp) {
+  size_t sourcelen = fileGetSize(fp);
+  char* source = malloc(sourcelen + 1);
+  size_t nobjs = fread(source, sourcelen, 1, fp);
+
+  if (nobjs != 1) {
+    free(source);
+    return NULL;
+  } else
+    return source;
+}

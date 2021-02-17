@@ -30,14 +30,14 @@
 #include <cglm/cglm.h>
 
 static const GLfloat vertex_buffer_positions[] = {
-    -0.5f, -0.5f, -0.5f, // x
-    0.f,   0.5f,  -0.5f, // y
-    0.5f,  -0.5f, -0.5f, // z
+    -0.5f, -0.5f, -0.5f,  // x
+    0.f,   0.5f,  -0.5f,  // y
+    0.5f,  -0.5f, -0.5f,  // z
 };
 
 static const GLfloat vertex_buffer_colors[] = {
-    1.0f, 0.0f, 0.0f, // first vertex
-    0.0f, 1.0f, 0.0f, // second...
+    1.0f, 0.0f, 0.0f,  // first vertex
+    0.0f, 1.0f, 0.0f,  // second...
     0.0f, 0.0f, 1.0f,
 };
 
@@ -46,40 +46,22 @@ int main() {
 
   glfwInit();
 
-  GLFWwindow *window = glfwCreateWindow(1024, 768, "Test2", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow(1024, 768, "Test2", NULL, NULL);
 
   glfwMakeContextCurrent(window);
 
   // init extensions in the current OpenGL context
   glewInit();
+  shamanInit();
 
   // Defult VAO -- needed for core profile
   GLuint vao = 0;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  //  shaman_sources_t p1src = shaman_read_distinct(
-  //      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.vert",
-  //      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.frag");
-  //  shaman_sources_t p2src = shaman_read_combined(
-  //      "/usr/home/nbrk/projects/cc/shaman/test/shaders/basic.shaman");
-  //  shaman_compiled_t p1comp = shaman_gl_compile(p1src);
-  //  shaman_compiled_t p2comp = shaman_gl_compile(p2src);
-  //  GLuint program1 = shaman_gl_assemble_program(shaman_gl_compile(p1src),
-  //  NULL); GLuint program2 = shaman_gl_assemble_program(p2comp, NULL);
-  //  shaman_gl_delete(p1comp);
-  //  shaman_gl_delete(p2comp);
-
-  GLuint program1 = shaman_gl_read_distinct_compile_assemble_delete(
+  GLuint program1 = shamanMakeProgram(
       "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.vert",
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.frag");
-  GLuint program2 = shaman_gl_read_combined_compile_assemble_delete(
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/basic.shaman");
-
-  if (program1 == 0 || program2 == 0) {
-    printf("Can't load shader programs!\n");
-    return EXIT_FAILURE;
-  }
+      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader.frag", NULL);
 
   GLuint vbo;
   glGenBuffers(1, &vbo);
@@ -100,9 +82,10 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glUseProgram(program);
+    //    glUseProgram(program);
+    shamanUseProgram(program);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // 'in' in shaders
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);  // 'in' in shaders
 
     // update uniforms
     GLint horizoff_u = glGetUniformLocation(program, "horizoff");
@@ -113,6 +96,7 @@ int main() {
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDisableVertexAttribArray(0);
+    shamanUnuseProgram();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -120,8 +104,8 @@ int main() {
       glfwSetWindowShouldClose(window, 1);
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
       program = program1;
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-      program = program2;
+    //    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+    //      program = program2;
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
       horizoff -= 0.1;
       //      dir[0] -= 0.1f;

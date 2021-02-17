@@ -21,86 +21,198 @@
  */
 #pragma once
 
+#include <stdbool.h>
+
 /*
- * Simple shader management library (shaman).
+ * Simple OpenGL shader management library (shaman).
+ *
+ * Don't forget to call shamanInit() before use of the functions.
  */
 
-/**
- * @brief Describes sources for a set of shaders
+/*
+ * DATA.
  */
-typedef struct {
-  char *vertex_text;
-  char *fragment_text;
-} shaman_sources_t;
 
-/**
- * @brief Decribes created and compiled shaders
+/*
+ * FUNCTIONS.
  */
-typedef struct {
-  unsigned int vertex_id;
-  char *vertex_error;
-  unsigned int fragment_id;
-  char *fragment_error;
-} shaman_compiled_t;
+extern void shamanInit(void);
 
-/**
- * @brief Parse shaders from the combined source file. Expects "#shader vertex",
- * "#shader fragment", etc. designators in the source code.
- * @param path
- * @return
+extern unsigned shamanMakeProgram(const char* vertexShaderPath,
+                                  const char* fragmentShaderPath,
+                                  const char* geometryShaderPath);
+
+extern unsigned shamanMakeProgramFromStrings(const char* vertexShaderText,
+                                             const char* fragmentShaderText,
+                                             const char* geometryShaderText);
+
+extern void shamanUseProgram(unsigned program);
+
+extern void shamanUnuseProgram(void);
+
+extern void shamanDeleteProgram(unsigned program);
+
+extern int shamanGetAttribLocation(unsigned program, const char* name);
+
+extern int shamanGetUniformLocation(unsigned program, const char* name);
+
+/*
+ * Uniforms values via stack
  */
-extern shaman_sources_t shaman_read_combined(const char *path);
+extern void shamanSetUniform1f(unsigned program, const char* name, float v0);
+extern void shamanSetUniform2f(unsigned program,
+                               const char* name,
+                               float v0,
+                               float v1);
+extern void shamanSetUniform3f(unsigned program,
+                               const char* name,
+                               float v0,
+                               float v1,
+                               float v2);
+extern void shamanSetUniform4f(unsigned program,
+                               const char* name,
+                               float v0,
+                               float v1,
+                               float v2,
+                               float v3);
 
-/**
- * @brief Parse shaders from distinct, non-combined (so not annotated by
- * #shader) source files
- * @param vertex_path
- * @param fragment_path
- * @return
+extern void shamanSetUniform1i(unsigned program, const char* name, int v0);
+extern void shamanSetUniform2i(unsigned program,
+                               const char* name,
+                               int v0,
+                               int v1);
+extern void shamanSetUniform3i(unsigned program,
+                               const char* name,
+                               int v0,
+                               int v1,
+                               int v2);
+extern void shamanSetUniform4i(unsigned program,
+                               const char* name,
+                               int v0,
+                               int v1,
+                               int v2,
+                               int v3);
+
+extern void shamanSetUniform1ui(unsigned program,
+                                const char* name,
+                                unsigned v0);
+extern void shamanSetUniform2ui(unsigned program,
+                                const char* name,
+                                unsigned v0,
+                                unsigned v1);
+extern void shamanSetUniform3ui(unsigned program,
+                                const char* name,
+                                unsigned v0,
+                                unsigned v1,
+                                unsigned v2);
+extern void shamanSetUniform4ui(unsigned program,
+                                const char* name,
+                                unsigned v0,
+                                unsigned v1,
+                                unsigned v2,
+                                unsigned v3);
+
+/*
+ * Uniforms vectorized
  */
-extern shaman_sources_t shaman_read_distinct(const char *vertex_path,
-                                             const char *fragment_path);
 
-/**
- * @brief Check if all the sources are present
- * @param sources
- * @return 0 on success
+extern void shamanSetUniform1fv(unsigned program,
+                                const char* name,
+                                int count,
+                                const float* value);
+extern void shamanSetUniform2fv(unsigned program,
+                                const char* name,
+                                int count,
+                                const float* value);
+extern void shamanSetUniform3fv(unsigned program,
+                                const char* name,
+                                int count,
+                                const float* value);
+extern void shamanSetUniform4fv(unsigned program,
+                                const char* name,
+                                int count,
+                                const float* value);
+
+extern void shamanSetUniform1iv(unsigned program,
+                                const char* name,
+                                int count,
+                                const int* value);
+extern void shamanSetUniform2iv(unsigned program,
+                                const char* name,
+                                int count,
+                                const int* value);
+extern void shamanSetUniform3iv(unsigned program,
+                                const char* name,
+                                int count,
+                                const int* value);
+extern void shamanSetUniform4iv(unsigned program,
+                                const char* name,
+                                int count,
+                                const int* value);
+
+extern void shamanSetUniform1uiv(unsigned program,
+                                 const char* name,
+                                 int count,
+                                 const unsigned* value);
+extern void shamanSetUniform2uiv(unsigned program,
+                                 const char* name,
+                                 int count,
+                                 const unsigned* value);
+extern void shamanSetUniform3uiv(unsigned program,
+                                 const char* name,
+                                 int count,
+                                 const unsigned* value);
+extern void shamanSetUniform4uiv(unsigned program,
+                                 const char* name,
+                                 int count,
+                                 const unsigned* value);
+
+/*
+ * Uniforms matrices
  */
-extern int shaman_read_ok(shaman_sources_t sources);
 
-/**
- * @brief Create and compile parsed shaders using the current OpenGL context
- * @param parsed
- * @return
- */
-extern shaman_compiled_t shaman_gl_compile(shaman_sources_t sources);
-
-/**
- * @brief Delete the shaders (compiled results) from the OpenGL context and free
- * any infolog memory
- * @param sources
- */
-extern void shaman_gl_delete(shaman_compiled_t compiled);
-
-/**
- * @brief Check if all the shaders were compiled successfully
- * @param compiled
- * @return 0 on success
- */
-extern int shaman_compiled_ok(shaman_compiled_t compiled);
-
-/**
- * @brief Create and link new program using the compiled shaders
- * @param compiled
- * @param infolog [out]
- * @return opengl program id or 0 on error
- */
-extern unsigned int shaman_gl_assemble_program(shaman_compiled_t compiled,
-                                               char **infolog);
-
-extern unsigned int
-shaman_gl_read_distinct_compile_assemble_delete(const char *vertex_path,
-                                                const char *fragment_path);
-
-extern unsigned int
-shaman_gl_read_combined_compile_assemble_delete(const char *path);
+extern void shamanSetUniformMatrix2fv(unsigned program,
+                                      const char* name,
+                                      int count,
+                                      bool transpose,
+                                      const float* value);
+extern void shamanSetUniformMatrix3fv(unsigned program,
+                                      const char* name,
+                                      int count,
+                                      bool transpose,
+                                      const float* value);
+extern void shamanSetUniformMatrix4fv(unsigned program,
+                                      const char* name,
+                                      int count,
+                                      bool transpose,
+                                      const float* value);
+extern void shamanSetUniformMatrix2x3fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);
+extern void shamanSetUniformMatrix3x2fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);
+extern void shamanSetUniformMatrix2x4fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);
+extern void shamanSetUniformMatrix4x2fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);
+extern void shamanSetUniformMatrix3x4fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);
+extern void shamanSetUniformMatrix4x3fv(unsigned program,
+                                        const char* name,
+                                        int count,
+                                        bool transpose,
+                                        const float* value);

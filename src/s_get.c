@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Nikolay Burkov <nbrk@linklevel.net>
+ * Copyright 2021 Nikolay Burkov <nbrk@linklevel.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -19,48 +19,25 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#include "shaman_internal.h"
+#include <GL/glew.h>
 
+#include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-size_t file_get_size(FILE *fp) {
-  size_t curpos = ftell(fp);
-  fseek(fp, 0, SEEK_END);
-  size_t endpos = ftell(fp);
-  fseek(fp, curpos, SEEK_SET);
-  return endpos;
+int shamanGetAttribLocation(unsigned program, const char* name) {
+  GLint location = glGetAttribLocation(program, name);
+  if (location == -1)
+    printf("No attrib '%s' in shader program %d\n", name, program);
+  assert(location != -1);
+
+  return (int)location;
 }
 
-char *file_get_contents(FILE *fp) {
-  size_t sourcelen = file_get_size(fp);
-  char *source = malloc(sourcelen + 1);
-  size_t nobjs = fread(source, sourcelen, 1, fp);
+int shamanGetUniformLocation(unsigned program, const char* name) {
+  GLint location = glGetUniformLocation(program, name);
+  if (location == -1)
+    printf("No uniform '%s' in shader program %d\n", name, program);
+  assert(location != -1);
 
-  if (nobjs != 1) {
-    free(source);
-    return NULL;
-  } else
-    return source;
-}
-
-char *contents_get_section(const char *contents, const char *hdrpat,
-                           const char *ftrpat) {
-  char *result = NULL;
-  char *hdrbegin = strstr(contents, hdrpat);
-  if (hdrbegin == NULL)
-    return NULL;
-  char *secbegin = strchr(hdrbegin, '\n'); // skip the line
-  if (secbegin == NULL)
-    return NULL;
-  else
-    secbegin++; // eat the \n
-  char *secend = strstr(secbegin, ftrpat);
-  if (secend == NULL)
-    result = strndup(secbegin, strlen(secbegin));
-  else
-    result = strndup(secbegin, secend - secbegin);
-
-  return result;
+  return (int)location;
 }

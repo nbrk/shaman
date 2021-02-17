@@ -4,10 +4,12 @@ project(shaman LANGUAGES C)
 
 set(SRCS
   include/shaman.h
+
   src/shaman_internal.h
-  src/read.c
-  src/textops.c
-  src/compile.c
+  src/s_utils.c
+  src/s_program.c
+  src/s_get.c
+  src/s_set.c
   )
 
 add_library(shaman SHARED ${SRCS})
