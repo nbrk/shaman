@@ -13,6 +13,7 @@ Shaman library has the following features:
 - Uniform setters wrapped in uniform locations lookup
 - User-toggled warnings/aborts on missing attrib or uniform location lookups
 - No extra data-types, non-invasive design: all returned data is plain OpenGL data
+- C89, the only dependency is `GLEW`
 
 ## Usage
 You can use `shaman` as a shared library (see `test/test2.c`) or by including 
@@ -52,6 +53,5 @@ glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3, GL_FLOA
 
 ## Header files
 There are two header files in the Shaman source directory:
-1. `shaman.h`, which contains both API and the implementation (when SHAMAN_IMPLEMENTATION is defined).
-** Copy this file alone into your project**.
+1. `shaman.h`, which contains both API and the implementation (when SHAMAN_IMPLEMENTATION is defined). **Copy this file alone into your project**.
 2. `include/shaman.h`, which contains only the API as part of the `shaman` shared library.
