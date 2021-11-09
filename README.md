@@ -28,6 +28,13 @@ shaman_store_program(COLORED_SHAPES, THE_SPHERE, "sphere.vert", "sphere.frag");
 shaman_store_program(TEXTURED_SHAPES, THE_SPHERE, "sphere_t.vert", "sphere_t.frag");
 ```
 
+... and then inside a render loop, optionally calling `glUseProgram()` for you:
+
+``` c
+GLuint program;
+shaman_access_program(COLORED_SHAPES, THE_SPHERE, true, &program);
+```
+
 etc.
 
 ## How it works
