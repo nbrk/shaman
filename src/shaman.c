@@ -179,8 +179,32 @@ int shaman_access_program(int table, int row, bool useit, GLuint* prog) {
 }
 
 int shaman_discard_program(int table, int row) {
-  // TODO: special case: allow -1 values for table and row for bulk discarding
+  // clear all tables
+  if (table == -1) {
+    int t, r;
+    for (t = 0; t < SHAMAN_NUM_TABLES; ++t) {
+      for (r = 0; r < SHAMAN_TABLE_NUM_PROGRAMS; ++r) {
+        glDeleteProgram(g_store[t][r]);
+        g_store[t][r] = 0;
+      }
+    }
+    return SHAMAN_OK;
+  }
 
+  // clear all progs in the table
+  if (row == -1) {
+    if (table < 0 || table >= SHAMAN_NUM_TABLES)
+      return SHAMAN_ERR_LOCATION_BOUNDS;
+
+    int r;
+    for (r = 0; r < SHAMAN_TABLE_NUM_PROGRAMS; ++r) {
+      glDeleteProgram(g_store[table][r]);
+      g_store[table][r] = 0;
+    }
+    return SHAMAN_OK;
+  }
+
+  // otherwise delete one program
   if (!is_location_correct(table, row))
     return SHAMAN_ERR_LOCATION_BOUNDS;
 
