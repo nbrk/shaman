@@ -29,9 +29,9 @@
 
 static GLuint g_store[SHAMAN_NUM_TABLES][SHAMAN_TABLE_NUM_PROGRAMS];
 
-int shaman_just_make_program(GLuint* out_prog,
-                             const char* vert_path,
-                             const char* frag_path) {
+int shaman_just_assemble_program(GLuint* out_prog,
+                                 const char* vert_path,
+                                 const char* frag_path) {
   int ret_code;
   FILE *vert_fp, *frag_fp;
   long vert_size, frag_size;
@@ -153,7 +153,7 @@ int shaman_store_program(int table,
   if (g_store[table][row] != 0)
     return SHAMAN_ERR_LOCATION_NOT_EMPTY;
 
-  ret_code = shaman_just_make_program(&program, vert_path, frag_path);
+  ret_code = shaman_just_assemble_program(&program, vert_path, frag_path);
   if (ret_code != SHAMAN_OK)
     return ret_code;
 

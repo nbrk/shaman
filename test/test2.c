@@ -63,10 +63,10 @@ int main() {
   glBindVertexArray(0);
 
   GLuint program1, program2;
-  shaman_just_make_program(
+  shaman_just_assemble_program(
       &program1, "/home/nbrk/projects/c/shaman/test/shaders/shader1.vert",
       "/home/nbrk/projects/c/shaman/test/shaders/shader1.frag");
-  program2 = shaman_just_make_program(
+  program2 = shaman_just_assemble_program(
       &program2, "/home/nbrk/projects/c/shaman/test/shaders/shader2.vert",
       "/home/nbrk/projects/c/shaman/test/shaders/shader2.frag");
 

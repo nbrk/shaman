@@ -55,9 +55,9 @@ enum {
  * @param frag_path
  * @return error code or SHAMAN_OK
  */
-extern int shaman_just_make_program(GLuint* out_prog,
-                                    const char* vert_path,
-                                    const char* frag_path);
+extern int shaman_just_assemble_program(GLuint* out_prog,
+                                        const char* vert_path,
+                                        const char* frag_path);
 
 /**
  * @brief Assemble the program and store it at the given 'location' inside the

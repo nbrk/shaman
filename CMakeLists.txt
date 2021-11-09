@@ -1,16 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(shaman LANGUAGES C)
+set(CMAKE_C_STANDARD 90)
 
 set(SRCS
   include/shaman.h
-
   src/shaman.c
-#  src/shaman_internal.h
-#  src/s_utils.c
-#  src/s_program.c
-#  src/s_get.c
-#  src/s_set.c
   )
 
 add_library(shaman SHARED ${SRCS})
