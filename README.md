@@ -1,5 +1,5 @@
 # Extremely simple C89 OpenGL shader loading/management library
-Shaman is a small, **C89 **, **easy to use** OpenGL shader program loading library.
+Shaman is a small, C89, easy to use OpenGL shader program loading library.
 
 ## Description
 Upon successful shader program assembly Shaman stores the OpenGL program object in 
