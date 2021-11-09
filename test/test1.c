@@ -19,11 +19,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#define SHAMAN_IMPLEMENTATION
-#include "../shaman.h"
+#include <shaman.h>
 
-//#include <shaman.h>
-
+#include <assert.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <GL/glew.h>
@@ -33,9 +32,9 @@
  * Shaders
  */
 const char vertexShaderPath[] =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.vert";
+    "/home/nbrk/projects/c/shaman/test/shaders/shader1.vert";
 const char fragmentShaderPath[] =
-    "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.frag";
+    "/home/nbrk/projects/c/shaman/test/shaders/shader1.frag";
 
 /*
  * Vertex data
@@ -113,22 +112,31 @@ int main(int argc, char** argv) {
   /*
    * Wire the datastream from the buffer as attributes
    */
-  shamanAbortOnMissingAttribLocation = false;
-  GLuint program =
-      shamanMakeProgram(vertexShaderPath, fragmentShaderPath, NULL);
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_position"));
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_normal"));
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "a_color"));
-  glEnableVertexAttribArray(shamanGetAttribLocation(program, "texcoord"));
+  //  int ret =
+  //      shaman_just_make_program(&program, vertexShaderPath,
+  //      fragmentShaderPath);
+  int ret = shaman_store_program(0, 0, vertexShaderPath, fragmentShaderPath);
+  if (ret != SHAMAN_OK) {
+    printf("Error: shaman_store_program() returned %d\n", ret);
+    return -1;
+  }
 
-  glVertexAttribPointer(shamanGetAttribLocation(program, "a_position"), 3,
-                        GL_FLOAT, GL_FALSE, 0, (void*)vertexPositionsOff);
-  glVertexAttribPointer(shamanGetAttribLocation(program, "a_normal"), 3,
-                        GL_FLOAT, GL_FALSE, 0, (void*)vertexNormalsOff);
-  glVertexAttribPointer(shamanGetAttribLocation(program, "a_color"), 4,
-                        GL_FLOAT, GL_FALSE, 0, (void*)vertexColorsOff);
-  glVertexAttribPointer(shamanGetAttribLocation(program, "texcoord"), 2,
-                        GL_FLOAT, GL_FALSE, 0, (void*)vertexTexcoordsOff);
+  GLuint program;
+  // configure program
+  shaman_access_program(0, 0, false, &program);
+  glEnableVertexAttribArray(glGetAttribLocation(program, "a_position"));
+  glEnableVertexAttribArray(glGetAttribLocation(program, "a_normal"));
+  glEnableVertexAttribArray(glGetAttribLocation(program, "a_color"));
+  glEnableVertexAttribArray(glGetAttribLocation(program, "texcoord"));
+
+  glVertexAttribPointer(glGetAttribLocation(program, "a_position"), 3, GL_FLOAT,
+                        GL_FALSE, 0, (void*)vertexPositionsOff);
+  glVertexAttribPointer(glGetAttribLocation(program, "a_normal"), 3, GL_FLOAT,
+                        GL_FALSE, 0, (void*)vertexNormalsOff);
+  glVertexAttribPointer(glGetAttribLocation(program, "a_color"), 4, GL_FLOAT,
+                        GL_FALSE, 0, (void*)vertexColorsOff);
+  glVertexAttribPointer(glGetAttribLocation(program, "texcoord"), 2, GL_FLOAT,
+                        GL_FALSE, 0, (void*)vertexTexcoordsOff);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
@@ -138,11 +146,12 @@ int main(int argc, char** argv) {
   glClearColor(0.2f, 0.2f, 0.2f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  shamanUseProgram(program);
+  //  glUseProgram(program);
+  shaman_access_program(0, 0, true, NULL);
   glBindVertexArray(vao);
   glDrawArrays(GL_TRIANGLES, 0, 3);
   glBindVertexArray(0);
-  shamanUnuseProgram();
+  glUseProgram(0);
 
   glfwSwapBuffers(window);
 
@@ -151,7 +160,7 @@ int main(int argc, char** argv) {
   /*
    * Termination
    */
-  shamanDeleteProgram(program);
+  glDeleteProgram(program);
   glfwTerminate();
 
   return 0;

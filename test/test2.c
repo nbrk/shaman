@@ -20,9 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-//#define SHAMAN_IMPLEMENTATION
-//#include "../shaman.h"
-
 #include <shaman.h>
 
 #include <stdio.h>
@@ -65,16 +62,16 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  GLuint program1 = shamanMakeProgram(
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.vert",
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader1.frag", NULL);
-  GLuint program2 = shamanMakeProgram(
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.vert",
-      "/usr/home/nbrk/projects/cc/shaman/test/shaders/shader2.frag", NULL);
+  GLuint program1, program2;
+  shaman_just_make_program(
+      &program1, "/home/nbrk/projects/c/shaman/test/shaders/shader1.vert",
+      "/home/nbrk/projects/c/shaman/test/shaders/shader1.frag");
+  program2 = shaman_just_make_program(
+      &program2, "/home/nbrk/projects/c/shaman/test/shaders/shader2.vert",
+      "/home/nbrk/projects/c/shaman/test/shaders/shader2.frag");
 
   GLfloat horizoff = 0.f;
   GLuint currentProgram = program2;
-  shamanAbortOnMissingUniformLocation = false;
   while (!glfwWindowShouldClose(window)) {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -83,11 +80,11 @@ int main() {
     glBindVertexArray(vao);
 
     // update uniforms
-    shamanSetUniform1f(currentProgram, "horizoff", horizoff);
+    glUniform1f(glGetUniformLocation(currentProgram, "horizoff"), horizoff);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    shamanUnuseProgram();
+    glUseProgram(0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

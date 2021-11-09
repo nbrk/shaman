@@ -21,6 +21,7 @@
  */
 #pragma once
 
+#include <GL/glew.h>
 #include <stdbool.h>
 
 /*
@@ -28,193 +29,30 @@
  *
  */
 
-/*
- * DATA.
- */
-extern bool shamanWarnOnMissingAttribLocation;
-extern bool shamanWarnOnMissingUniformLocation;
-extern bool shamanAbortOnCompileErrors;
-extern bool shamanAbortOnMissingAttribLocation;
-extern bool shamanAbortOnMissingUniformLocation;
+enum {
+  SHAMAN_OK,
+  SHAMAN_ERR_LOCATION_BOUNDS,
+  SHAMAN_ERR_LOCATION_NOT_EMPTY,
+  SHAMAN_ERR_LOCATION_EMPTY,
+  SHAMAN_ERR_VERTEX_OPEN,
+  SHAMAN_ERR_FRAGMENT_OPEN,
+  SHAMAN_ERR_VERTEX_IO,
+  SHAMAN_ERR_FRAGMENT_IO,
+  SHAMAN_ERR_VERTEX_PARSE,
+  SHAMAN_ERR_FRAGMENT_PARSE,
+  SHAMAN_ERR_PROGRAM_LINK,
+  SHAMAN_ERR_PROGRAM_VALIDATE,
+};
 
-/*
- * FUNCTIONS.
- */
-extern unsigned shamanMakeProgram(const char* vertexShaderPath,
-                                  const char* fragmentShaderPath,
-                                  const char* geometryShaderPath);
+extern int shaman_just_make_program(GLuint* out_prog,
+                                    const char* vert_path,
+                                    const char* frag_path);
 
-extern unsigned shamanMakeProgramFromStrings(const char* vertexShaderText,
-                                             const char* fragmentShaderText,
-                                             const char* geometryShaderText);
+extern int shaman_store_program(int table,
+                                int row,
+                                const char* vert_path,
+                                const char* frag_path);
 
-extern void shamanUseProgram(unsigned program);
+extern int shaman_access_program(int table, int row, bool useit, GLuint* prog);
 
-extern void shamanUnuseProgram(void);
-
-extern void shamanDeleteProgram(unsigned program);
-
-extern int shamanGetAttribLocation(unsigned program, const char* name);
-
-extern int shamanGetUniformLocation(unsigned program, const char* name);
-
-/*
- * Uniforms values via stack
- */
-extern void shamanSetUniform1f(unsigned program, const char* name, float v0);
-extern void shamanSetUniform2f(unsigned program,
-                               const char* name,
-                               float v0,
-                               float v1);
-extern void shamanSetUniform3f(unsigned program,
-                               const char* name,
-                               float v0,
-                               float v1,
-                               float v2);
-extern void shamanSetUniform4f(unsigned program,
-                               const char* name,
-                               float v0,
-                               float v1,
-                               float v2,
-                               float v3);
-
-extern void shamanSetUniform1i(unsigned program, const char* name, int v0);
-extern void shamanSetUniform2i(unsigned program,
-                               const char* name,
-                               int v0,
-                               int v1);
-extern void shamanSetUniform3i(unsigned program,
-                               const char* name,
-                               int v0,
-                               int v1,
-                               int v2);
-extern void shamanSetUniform4i(unsigned program,
-                               const char* name,
-                               int v0,
-                               int v1,
-                               int v2,
-                               int v3);
-
-extern void shamanSetUniform1ui(unsigned program,
-                                const char* name,
-                                unsigned v0);
-extern void shamanSetUniform2ui(unsigned program,
-                                const char* name,
-                                unsigned v0,
-                                unsigned v1);
-extern void shamanSetUniform3ui(unsigned program,
-                                const char* name,
-                                unsigned v0,
-                                unsigned v1,
-                                unsigned v2);
-extern void shamanSetUniform4ui(unsigned program,
-                                const char* name,
-                                unsigned v0,
-                                unsigned v1,
-                                unsigned v2,
-                                unsigned v3);
-
-/*
- * Uniforms vectorized
- */
-
-extern void shamanSetUniform1fv(unsigned program,
-                                const char* name,
-                                int count,
-                                const float* value);
-extern void shamanSetUniform2fv(unsigned program,
-                                const char* name,
-                                int count,
-                                const float* value);
-extern void shamanSetUniform3fv(unsigned program,
-                                const char* name,
-                                int count,
-                                const float* value);
-extern void shamanSetUniform4fv(unsigned program,
-                                const char* name,
-                                int count,
-                                const float* value);
-
-extern void shamanSetUniform1iv(unsigned program,
-                                const char* name,
-                                int count,
-                                const int* value);
-extern void shamanSetUniform2iv(unsigned program,
-                                const char* name,
-                                int count,
-                                const int* value);
-extern void shamanSetUniform3iv(unsigned program,
-                                const char* name,
-                                int count,
-                                const int* value);
-extern void shamanSetUniform4iv(unsigned program,
-                                const char* name,
-                                int count,
-                                const int* value);
-
-extern void shamanSetUniform1uiv(unsigned program,
-                                 const char* name,
-                                 int count,
-                                 const unsigned* value);
-extern void shamanSetUniform2uiv(unsigned program,
-                                 const char* name,
-                                 int count,
-                                 const unsigned* value);
-extern void shamanSetUniform3uiv(unsigned program,
-                                 const char* name,
-                                 int count,
-                                 const unsigned* value);
-extern void shamanSetUniform4uiv(unsigned program,
-                                 const char* name,
-                                 int count,
-                                 const unsigned* value);
-
-/*
- * Uniforms matrices
- */
-
-extern void shamanSetUniformMatrix2fv(unsigned program,
-                                      const char* name,
-                                      int count,
-                                      bool transpose,
-                                      const float* value);
-extern void shamanSetUniformMatrix3fv(unsigned program,
-                                      const char* name,
-                                      int count,
-                                      bool transpose,
-                                      const float* value);
-extern void shamanSetUniformMatrix4fv(unsigned program,
-                                      const char* name,
-                                      int count,
-                                      bool transpose,
-                                      const float* value);
-extern void shamanSetUniformMatrix2x3fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
-extern void shamanSetUniformMatrix3x2fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
-extern void shamanSetUniformMatrix2x4fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
-extern void shamanSetUniformMatrix4x2fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
-extern void shamanSetUniformMatrix3x4fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
-extern void shamanSetUniformMatrix4x3fv(unsigned program,
-                                        const char* name,
-                                        int count,
-                                        bool transpose,
-                                        const float* value);
+extern int shaman_discard_program(int table, int row);
